@@ -7,29 +7,25 @@ import {
 } from "@mui/material";
 import { Pokimon, PokimonApiResonse } from "../../types/interface";
 import InfoIcon from "@mui/icons-material/Info";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const PokimonList: React.FC = () => {
   const [pokimons, setPokimons] = useState<Pokimon[]>([]);
   const [nextUrl, setNextUrl] = useState<string>(
-    "https://pokeapi.co/api/v2/pokemon/"
+    "https://pokeapi.co/api/v2/pokemon"
   );
   const navigate = useNavigate();
 
-  const ref = useRef<HTMLDivElement>(null);
-
   const onScroll = () => {
-    if (ref.current) {
-      const { scrollTop, scrollHeight, clientHeight } = ref.current;
-      console.log({ scrollHeight, scrollTop, clientHeight });
-      if (scrollTop + clientHeight === scrollHeight) {
-        fetchPokimons();
-      }
+    const { scrollHeight, clientHeight, scrollTop } = document.documentElement;
+    console.log({ scrollHeight, clientHeight, scrollTop });
+    if (scrollTop + clientHeight >= scrollHeight) {
+      fetchPokimons();
     }
   };
 
-  const fetchPokimons = () => {
+  const fetchPokimons = useCallback(() => {
     nextUrl &&
       fetch(nextUrl)
         .then((resp) => resp.json())
@@ -38,7 +34,7 @@ const PokimonList: React.FC = () => {
           setPokimons((val) => [...val, ...data.results]);
         })
         .catch((err) => console.log(err));
-  };
+  }, [nextUrl]);
 
   const navigateToDetails = (url: string) => {
     navigate(`/pokimon`, {
@@ -55,7 +51,7 @@ const PokimonList: React.FC = () => {
     };
   }, []);
   return (
-    <div ref={ref} onScroll={onScroll}>
+    <div>
       <Paper variant="outlined">
         <ImageList cols={4}>
           {pokimons.map((item, index) => (
